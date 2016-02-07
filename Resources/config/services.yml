@@ -1,0 +1,10 @@
+services:
+    resource_bundle.twig_extension:
+        class: freefair\ResourceBundleBundle\ResourceBundleExtension
+        public: false
+        arguments: ['@service_container', '@router']
+        tags:
+            - { name: twig.extension }
+#    bower.example:
+#        class: freefair\ResourceBundleBundle\Example
+#        arguments: [@service_id, "plain_value", %parameter%]

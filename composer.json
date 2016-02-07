@@ -1,0 +1,36 @@
+{
+  "name": "freefair/ResourceBundleBundle",
+  "type": "symfony-bundle",
+  "description": "This Bundle proviedes functionality for bundeling and minifing resources",
+  "keywords": ["bundle", "bundleing", "assets", "resources", "css", "scss", "minifing", "javascript", "js"],
+  "homepage": "http://freefair.io",
+  "license": "MIT",
+  "authors": [
+	{
+	  "name": "Dennis Fricke",
+	  "email": "dennis.fricke@freefair.io"
+	},
+	{
+	  "name": "Lars Grefer",
+	  "email": "lars.grefer@freefair.io"
+	}
+  ],
+
+  "require": {
+	"php": ">=5.5.9",
+	"symfony/symfony": "3.0.*",
+	"matthiasmullie/minify": "^1.3"
+  },
+
+  "require-dev": {
+  },
+
+  "suggest": {
+  },
+
+  "autoload":{
+	"psr-4":{
+	  "freefair\\ResourceBundleBundle\\": ""
+	}
+  }
+}
