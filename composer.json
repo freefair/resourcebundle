@@ -1,5 +1,5 @@
 {
-  "name": "freefair/ResourceBundleBundle",
+  "name": "freefair/resource-bundle",
   "type": "symfony-bundle",
   "description": "This Bundle proviedes functionality for bundeling and minifing resources",
   "keywords": ["bundle", "bundleing", "assets", "resources", "css", "scss", "minifing", "javascript", "js"],
