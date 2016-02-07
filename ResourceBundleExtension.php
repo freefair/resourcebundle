@@ -1,11 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: dennis
- * Date: 07.02.16
- * Time: 19:00
- */
-
 namespace freefair\ResourceBundleBundle;
 
 use freefair\ResourceBundleBundle\Controller\DefaultController;
