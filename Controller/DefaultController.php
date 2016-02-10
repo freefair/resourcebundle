@@ -15,6 +15,54 @@ class DefaultController extends Controller
 	public static $mimetype_file_mapping = array("text/javascript" => ".js", "text/css" => ".css");
 	private static $mimetype_minifier_mapping = array("text/javascript" => JS::class, "text/css" => CSS::class);
 
+	private static function normalizeFilename($f)
+	{
+		if(strpos($f, "./") === 0)
+			return substr($f, 2);
+		return $f;
+	}
+
+	private static function scanDir($dir){
+		$result = array();
+		$dh = opendir($dir);
+
+		while($file = readdir($dh)) {
+			if($file == "." || $file == "..") continue;
+			if(is_dir($dir . DIRECTORY_SEPARATOR . $file)) {
+				$result = array_merge($result, self::scanDir($dir . DIRECTORY_SEPARATOR . $file));
+			} else {
+				$result[] = $dir . DIRECTORY_SEPARATOR . $file;
+			}
+		}
+
+		closedir($dh);
+		return $result;
+	}
+
+	private static $list = null;
+	private static function getFileList($basedir) {
+		if(self::$list == null) {
+			self::$list = self::scanDir($basedir);
+		}
+		return self::$list;
+	}
+
+	private static function findFiles($regex, $basedir)
+	{
+		if(strpos($regex, "regex:") === 0) $regex = substr($regex, 6);
+		else $regex = str_replace("*", "([^/]*)", str_replace("**", "(.+)", $regex));
+
+		$regex = "~$basedir" . DIRECTORY_SEPARATOR . "$regex~";
+
+		$fileList = self::getFileList($basedir);
+		$result = array();
+		foreach($fileList as $file) {
+			if(preg_match($regex, $file))
+				$result[] = $file;
+		}
+		return $result;
+	}
+
 	/**
 	 * @param $bowerDir
 	 * @param $baseDir
@@ -25,30 +73,25 @@ class DefaultController extends Controller
 	public static function getFilesFromBundle($bowerDir, $baseDir, $bundle, $fileending)
 	{
 		$files = array_map(function ($f) use ($bowerDir, $baseDir) {
-			$normalizeFilename = function ($f) {
-				if (strpos("./", $f) === 0)
-					return substr($f, 2);
-				return $f;
-			};
-
-			$explode = explode(":", $f);
+			$explode = explode(":", $f, 2);
 			if (count($explode) == 1)
-				return array($baseDir . DIRECTORY_SEPARATOR . $f);
-			else {
-				if ($explode[0] == "bower") {
-					$directory = $bowerDir . DIRECTORY_SEPARATOR . $explode[1] . DIRECTORY_SEPARATOR;
-					$bowerConfig = json_decode(file_get_contents($directory . ".bower.json"));
-					if (is_array($bowerConfig->main)) {
-						return array_map(function ($v) use ($directory, $normalizeFilename) {
-							return $directory . $normalizeFilename($v);
-						}, $bowerConfig->main);
-					} else {
-						return array($directory . $normalizeFilename($bowerConfig->main));
-					}
-				} else if ($explode[0] == "file") {
-					return array($explode[1]);
+				$explode = array("file", $explode[0]);
+
+
+			if ($explode[0] == "bower") {
+				$directory = $bowerDir . DIRECTORY_SEPARATOR . $explode[1] . DIRECTORY_SEPARATOR;
+				$bowerConfig = json_decode(file_get_contents($directory . ".bower.json"));
+				if (is_array($bowerConfig->main)) {
+					return array_map(function ($v) use ($directory) {
+						return $directory . self::normalizeFilename($v);
+					}, $bowerConfig->main);
+				} else {
+					return array($directory . self::normalizeFilename($bowerConfig->main));
 				}
+			} else if ($explode[0] == "file") {
+				return self::findFiles($explode[1], $baseDir);
 			}
+
 			return array($baseDir . DIRECTORY_SEPARATOR . $f);
 		}, $bundle["files"]);
 		$files = call_user_func_array('array_merge', $files);
