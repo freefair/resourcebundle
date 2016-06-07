@@ -10,6 +10,8 @@ use MatthiasMullie\Minify\CSS;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Filesystem\Exception\IOException;
 
+define("DIR_SEP", "/");
+
 class DefaultController extends Controller
 {
 	public static $mimetype_file_mapping = array("text/javascript" => ".js", "text/css" => ".css");
@@ -28,10 +30,10 @@ class DefaultController extends Controller
 
 		while($file = readdir($dh)) {
 			if($file == "." || $file == "..") continue;
-			if(is_dir($dir . DIRECTORY_SEPARATOR . $file)) {
-				$result = array_merge($result, self::scanDir($dir . DIRECTORY_SEPARATOR . $file));
+			if(is_dir($dir . DIR_SEP . $file)) {
+				$result = array_merge($result, self::scanDir($dir . DIR_SEP . $file));
 			} else {
-				$result[] = $dir . DIRECTORY_SEPARATOR . $file;
+				$result[] = $dir . DIR_SEP . $file;
 			}
 		}
 
@@ -52,7 +54,7 @@ class DefaultController extends Controller
 		if(strpos($regex, "regex:") === 0) $regex = substr($regex, 6);
 		else $regex = str_replace("*", "([^/]*)", str_replace("**", "(.+)", $regex));
 
-		$regex = "~$basedir" . DIRECTORY_SEPARATOR . "$regex~";
+		$regex = "~$basedir" . DIR_SEP . "$regex~";
 
 		$fileList = self::getFileList($basedir);
 		$result = array();
@@ -79,7 +81,7 @@ class DefaultController extends Controller
 
 
 			if ($explode[0] == "bower") {
-				$directory = $bowerDir . DIRECTORY_SEPARATOR . $explode[1] . DIRECTORY_SEPARATOR;
+				$directory = $bowerDir . DIR_SEP . $explode[1] . DIR_SEP;
 				$bowerConfig = json_decode(file_get_contents($directory . ".bower.json"));
 				if (is_array($bowerConfig->main)) {
 					return array_map(function ($v) use ($directory) {
@@ -92,7 +94,7 @@ class DefaultController extends Controller
 				return self::findFiles($explode[1], $baseDir);
 			}
 
-			return array($baseDir . DIRECTORY_SEPARATOR . $f);
+			return array($baseDir . DIR_SEP . $f);
 		}, $bundle["files"]);
 		$files = call_user_func_array('array_merge', $files);
 		$files = array_filter($files, function ($value) use ($fileending) {
@@ -161,3 +163,4 @@ class DefaultController extends Controller
         return new Response($content, 200, array('content-type' => $filetype));
     }
 }
+
