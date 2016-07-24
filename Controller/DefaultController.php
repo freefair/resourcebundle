@@ -83,6 +83,7 @@ class DefaultController extends Controller
 			if ($explode[0] == "bower") {
 				$directory = $bowerDir . DIR_SEP . $explode[1] . DIR_SEP;
 				$bowerConfig = json_decode(file_get_contents($directory . ".bower.json"));
+				if(!isset($bowerConfig->main)) return array();
 				if (is_array($bowerConfig->main)) {
 					return array_map(function ($v) use ($directory) {
 						return $directory . self::normalizeFilename($v);
